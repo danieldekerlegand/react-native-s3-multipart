@@ -79,9 +79,13 @@
   "resolutions": {
     "@types/react": "17.0.21"
   },
+  "dependencies": {
+    "snake-case": "^3.0.4"
+  },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "@react-native-async-storage/async-storage": "*"
   },
   "engines": {
     "node": ">= 18.0.0"
