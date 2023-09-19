@@ -2,13 +2,16 @@
 #import <AWSS3/AWSS3.h>
 
 #ifdef RCT_NEW_ARCH_ENABLED
+
 #import "RNS3MultipartSpec.h"
-
 @interface S3Multipart : NSObject <NativeS3MultipartSpec>
-#else
-#import <React/RCTBridgeModule.h>
 
+#else
+
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 @interface S3Multipart : NSObject <RCTBridgeModule>
+
 #endif
 
 typedef NS_ENUM(NSInteger, CredentialType) {

@@ -4,16 +4,17 @@
 static NSMutableDictionary *nativeCredentialsOptions;
 static bool alreadyInitialize = false;
 static bool enabledProgress = true;
-static NSString* instanceKey = @"RNS3TransferUtilityMultiPart";
+static NSString* instanceKey = @"S3Multipart";
 static int completedPercentage = 0;
 
-@interface RNS3TransferUtilityMultiPart ()
+@interface S3Multipart ()
 
 @property (copy, nonatomic) AWSS3TransferUtilityMultiPartUploadCompletionHandlerBlock completionUploadHandler;
 @property (copy, nonatomic) AWSS3TransferUtilityMultiPartProgressBlock uploadProgress;
-
 @property (copy, nonatomic) AWSS3TransferUtilityDownloadCompletionHandlerBlock completionDownloadHandler;
 @property (copy, nonatomic) AWSS3TransferUtilityProgressBlock downloadProgress;
+
+@end
 
 @implementation S3Multipart
 
