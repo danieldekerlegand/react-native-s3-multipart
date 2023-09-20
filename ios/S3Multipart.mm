@@ -19,7 +19,7 @@ static int completedPercentage = 0;
 @implementation S3Multipart
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"onSessionConnect"];
+    return @[@"@_S3Multipart_Events"];
 }
 
 + (NSMutableDictionary *)nativeCredentialsOptions {
