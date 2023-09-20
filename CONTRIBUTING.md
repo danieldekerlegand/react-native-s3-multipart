@@ -57,7 +57,6 @@ To edit the Objective-C or Swift files, open `example/ios/S3MultipartExample.xcw
 
 To edit the Java or Kotlin files, open `example/android` in Android studio and find the source files at `react-native-s3-multipart` under `Android`.
 
-
 ### Commit message convention
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:

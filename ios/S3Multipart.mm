@@ -189,8 +189,7 @@ RCT_EXPORT_METHOD(enableProgressSent: (BOOL)enabled resolver:(RCTPromiseResolveB
     if ([state isEqual: @"in_progress"] && !enabledProgress) {
         return;
     }
-    [self.bridge.eventDispatcher
-     sendAppEventWithName:@"@_RNS3_Events"
+    [self sendEventWithName:@"@_S3Multipart_Events"
      body:@{
             @"task":@{
                     @"id": [task transferID],

@@ -4,13 +4,13 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 
 #import "RNS3MultipartSpec.h"
-@interface S3Multipart : NSObject <NativeS3MultipartSpec>
+@interface S3Multipart : RCTEventEmitter <NativeS3MultipartSpec>
 
 #else
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-@interface S3Multipart : NSObject <RCTBridgeModule>
+@interface S3Multipart : RCTEventEmitter <RCTBridgeModule>
 
 #endif
 
