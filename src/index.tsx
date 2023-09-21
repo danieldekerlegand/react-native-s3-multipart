@@ -58,8 +58,6 @@ const eventEmitter = new NativeEventEmitter(S3Multipart);
 eventEmitter.addListener(
   '@_S3Multipart_Events',
   async (event: { task: any; type: any; error: any | undefined }) => {
-    console.log('@_S3Multipart_Events event.task', event.task);
-
     if (!taskExtras) await getTaskExtras();
     const { task, error } = event;
 

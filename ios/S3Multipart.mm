@@ -94,13 +94,11 @@ static int completedPercentage = 0;
     if ([options[@"remember_last_instance"] boolValue] && transferUtility) {
       return YES;
     } else if (transferUtility) {
-      NSLog(@"forget last instance");
       NSNotificationCenter * __weak center = [NSNotificationCenter defaultCenter];
       id __block token = [center addObserverForName:@"com.amazonaws.AWSS3TransferUtility.AWSS3TransferUtilityURLSessionDidBecomeInvalidNotification"
         object:nil
         queue:[NSOperationQueue mainQueue]
         usingBlock:^(NSNotification *notification) {
-          NSLog(@"instance destroyed");
           [self createNewTransferUtility:options];
           [center removeObserver:token];
         }];
@@ -129,18 +127,14 @@ static int completedPercentage = 0;
   AWSServiceConfiguration *configuration = [[AWSServiceConfiguration alloc] initWithRegion:region credentialsProvider:credentialsProvider];
 
   if ([options[@"allows_cellular_access"] boolValue]) {
-    NSLog(@"allowsCellularAccess: true");
     configuration.allowsCellularAccess = true;
   } else {
-    NSLog(@"allowsCellularAccess: false");
     configuration.allowsCellularAccess = false;
   }
 
   AWSS3TransferUtilityConfiguration *transferUtilityConfiguration = [[AWSS3TransferUtilityConfiguration alloc] init];
   transferUtilityConfiguration.timeoutIntervalForResource = 60 * 60 * 24;
   transferUtilityConfiguration.retryLimit = 10;
-
-    NSLog(@"registerS3TransferUtilityWithConfiguration multipart");
     
   [AWSS3TransferUtility registerS3TransferUtilityWithConfiguration:configuration transferUtilityConfiguration:transferUtilityConfiguration forKey:instanceKey];
 
@@ -217,7 +211,6 @@ RCT_EXPORT_METHOD(initializeRNS3) {
         int percentageAsInt = (int)percentage;
         if (percentageAsInt > completedPercentage) {
             completedPercentage = (int)percentage;
-            NSLog(@"completedPercentage: %i", completedPercentage);
             [self sendEvent:task
                        type:@"upload"
                       state:@"in_progress"
@@ -240,7 +233,6 @@ RCT_EXPORT_METHOD(initializeRNS3) {
 }
 
 RCT_EXPORT_METHOD(upload: (NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"start multipart upload");
     NSURL *fileURL = [NSURL fileURLWithPath:[options objectForKey:@"file"]];
     NSDictionary *meta = [options objectForKey:@"meta"];
 
@@ -283,7 +275,6 @@ RCT_EXPORT_METHOD(pause:(NSString *)taskIdentifier) {
         if (result && ![result isEqual:[NSNull null]]) {
             NSString *type = [result objectForKey:@"type"];
             AWSS3TransferUtilityMultiPartUploadTask *task = [result objectForKey:@"task"];
-            NSLog(@"Calling suspend on task: %@", task.transferID);
             [task suspend];
             [self sendEvent:task
                        type:type
@@ -301,7 +292,6 @@ RCT_EXPORT_METHOD(resume:(NSString *)taskIdentifier) {
         if (result && ![result isEqual:[NSNull null]]) {
             NSString *type = [result objectForKey:@"type"];
             AWSS3TransferUtilityMultiPartUploadTask *task = [result objectForKey:@"task"];
-            NSLog(@"Calling resume on task: %@", task.transferID);
             [task resume];
             [self sendEvent:task
                        type:type
@@ -330,14 +320,12 @@ RCT_EXPORT_METHOD(cancel:(NSString *)taskIdentifier) {
 }
 
 RCT_EXPORT_METHOD(cancelAllUploads) {
-    NSLog(@"TransferUtilityMultipart cancelAllUploads");
     AWSS3TransferUtility *transferUtility = [AWSS3TransferUtility S3TransferUtilityForKey:instanceKey];
 
     [[transferUtility getUploadTasks] continueWithBlock:^id(AWSTask *task) {
         if (task.result) {
             NSArray<AWSS3TransferUtilityUploadTask*> *uploadTasks = task.result;
             for (AWSS3TransferUtilityUploadTask *task in uploadTasks) {
-                NSLog(@"TransferUtilityMultipart cancel task %@", [task transferID]);
                 [task cancel];
             }
         }
@@ -348,7 +336,6 @@ RCT_EXPORT_METHOD(cancelAllUploads) {
         if (task.result) {
             NSArray<AWSS3TransferUtilityMultiPartUploadTask*> *uploadTasks = task.result;
             for (AWSS3TransferUtilityMultiPartUploadTask *task in uploadTasks) {
-                NSLog(@"TransferUtilityMultipart cancel multipart task %@", [task transferID]);
                 [task cancel];
             }
         }
@@ -357,7 +344,6 @@ RCT_EXPORT_METHOD(cancelAllUploads) {
 }
 
 - (void) taskById:(NSString *)taskIdentifier completionHandler:(void(^)(NSDictionary *))handler {
-    NSLog(@"Get taskById: %@", taskIdentifier);
     //__block NSDictionary *result = [NSNull null];
     AWSS3TransferUtility *transferUtility = [AWSS3TransferUtility S3TransferUtilityForKey:instanceKey];
     [[transferUtility getMultiPartUploadTasks] continueWithBlock:^id(AWSTask *task) {
@@ -365,9 +351,7 @@ RCT_EXPORT_METHOD(cancelAllUploads) {
             NSArray<AWSS3TransferUtilityMultiPartUploadTask*> *uploadTasks = task.result;
 
             for (AWSS3TransferUtilityMultiPartUploadTask *task in uploadTasks) {
-                NSLog(@"Upload task: %@", task.transferID);
                 if ([task.transferID isEqualToString:taskIdentifier]) {
-                    NSLog(@"Found task");
                     handler(@{@"type":@"upload", @"task":task});
                     return nil;
                 }
