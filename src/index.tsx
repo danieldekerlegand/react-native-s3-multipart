@@ -50,8 +50,8 @@ const storeKey = '@_RNS3_Tasks_Extra';
  *		 iOS: { bucket, key, state, bytes, totalBytes }
  *		 Android: { bucket, key, bytes }
  */
-let taskExtras: { [x: string]: any };
-let listeners: { [x: string]: any }; // [id]: [Function, ...]
+let taskExtras: { [x: string]: any } = {};
+let listeners: { [x: string]: any } = {}; // [id]: [Function, ...]
 
 const eventEmitter = new NativeEventEmitter(S3Multipart);
 
