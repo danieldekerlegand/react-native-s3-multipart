@@ -30,10 +30,6 @@ const S3Multipart = NativeModules.S3Multipart
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return S3Multipart.multiply(a, b);
-}
-
 const transferTypes = ['upload', 'download'];
 const defaultOptions = {
   remember_last_instance: true,

@@ -5,7 +5,6 @@ static NSMutableDictionary *nativeCredentialsOptions;
 static bool alreadyInitialize = false;
 static bool enabledProgress = true;
 static NSString* instanceKey = @"S3Multipart";
-static int completedPercentage = 0;
 
 @interface S3Multipart ()
 
@@ -137,21 +136,9 @@ static int completedPercentage = 0;
   transferUtilityConfiguration.retryLimit = 10;
     
   [AWSS3TransferUtility registerS3TransferUtilityWithConfiguration:configuration transferUtilityConfiguration:transferUtilityConfiguration forKey:instanceKey];
-
-  //return YES;
 }
 
 RCT_EXPORT_MODULE()
-
-RCT_EXPORT_METHOD(multiply:(double)a
-                  b:(double)b
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-{
-    NSNumber *result = @(a * b);
-
-    resolve(result);
-}
 
 RCT_EXPORT_METHOD(setupWithNative: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([self setup:nativeCredentialsOptions]));
@@ -191,8 +178,8 @@ RCT_EXPORT_METHOD(enableProgressSent: (BOOL)enabled resolver:(RCTPromiseResolveB
      body:@{
             @"task":@{
                     @"id": [task transferID],
-                    // @"bucket":[task bucket],
-                    // @"key":[task key],
+                    @"bucket":[task bucket],
+                    @"key":[task key],
                     @"state":state,
                     @"bytes":@(bytes),
                     @"totalBytes":@(totalBytes)
@@ -207,17 +194,12 @@ RCT_EXPORT_METHOD(initializeRNS3) {
     alreadyInitialize = NO;
     
     self.uploadProgress = ^(AWSS3TransferUtilityMultiPartUploadTask *task, NSProgress *progress) {
-        float percentage = (100*progress.completedUnitCount)/progress.totalUnitCount;
-        int percentageAsInt = (int)percentage;
-        if (percentageAsInt > completedPercentage) {
-            completedPercentage = (int)percentage;
-            [self sendEvent:task
-                       type:@"upload"
-                      state:@"in_progress"
-                      bytes:progress.completedUnitCount
-                 totalBytes:progress.totalUnitCount
-                      error:nil];
-        }
+        [self sendEvent:task
+                    type:@"upload"
+                    state:@"in_progress"
+                    bytes:progress.completedUnitCount
+                totalBytes:progress.totalUnitCount
+                    error:nil];
     };
     
     self.completionUploadHandler = ^(AWSS3TransferUtilityMultiPartUploadTask *task, NSError *error) {
@@ -246,8 +228,6 @@ RCT_EXPORT_METHOD(upload: (NSDictionary *)options resolver:(RCTPromiseResolveBlo
 
     expression.progressBlock = self.uploadProgress;
 
-    completedPercentage = 0;
-
     AWSS3TransferUtility *transferUtility = [AWSS3TransferUtility S3TransferUtilityForKey:instanceKey];
     [[transferUtility uploadFileUsingMultiPart:fileURL
                                         bucket:[options objectForKey:@"bucket"]
@@ -261,8 +241,8 @@ RCT_EXPORT_METHOD(upload: (NSDictionary *)options resolver:(RCTPromiseResolveBlo
             AWSS3TransferUtilityMultiPartUploadTask *uploadTask = task.result;
             resolve(@{
                       @"id": [uploadTask transferID],
-                      // @"bucket": [uploadTask bucket],
-                      // @"key": [uploadTask key],
+                      @"bucket": [uploadTask bucket],
+                      @"key": [uploadTask key],
                       @"state":@"waiting"
                       });
         }
@@ -344,7 +324,6 @@ RCT_EXPORT_METHOD(cancelAllUploads) {
 }
 
 - (void) taskById:(NSString *)taskIdentifier completionHandler:(void(^)(NSDictionary *))handler {
-    //__block NSDictionary *result = [NSNull null];
     AWSS3TransferUtility *transferUtility = [AWSS3TransferUtility S3TransferUtilityForKey:instanceKey];
     [[transferUtility getMultiPartUploadTasks] continueWithBlock:^id(AWSTask *task) {
         if (task.result) {
@@ -368,8 +347,8 @@ RCT_EXPORT_METHOD(getTask:(NSString *)taskIdentifier resolver:(RCTPromiseResolve
             AWSS3TransferUtilityMultiPartUploadTask *task = [result objectForKey:@"task"];
             resolve(@{
                       @"id": [task transferID],
-                      //@"bucket":[task bucket],
-                      //@"key":[task key],
+                      @"bucket":[task bucket],
+                      @"key":[task key],
                       });
         } else {
             resolve([NSNull null]);
@@ -387,8 +366,8 @@ RCT_EXPORT_METHOD(getTasks:(NSString *)type resolver:(RCTPromiseResolveBlock)res
                 for (AWSS3TransferUtilityMultiPartUploadTask *task in uploadTasks) {
                     [result addObject:@{
                                         @"id":[task transferID],
-                                        // @"bucket":[task bucket],
-                                        // @"key":[task key],
+                                        @"bucket":[task bucket],
+                                        @"key":[task key],
                                         }];
                 }
                 resolve(result);

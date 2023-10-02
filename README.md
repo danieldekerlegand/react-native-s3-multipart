@@ -11,11 +11,11 @@ npm install react-native-s3-multipart
 ## Usage
 
 ```js
-import { multiply } from 'react-native-s3-multipart';
+import { } from 'react-native-s3-multipart';
 
 // ...
 
-const result = await multiply(3, 7);
+
 ```
 
 ## Contributing
