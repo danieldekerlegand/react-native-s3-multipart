@@ -44,10 +44,11 @@ import com.amazonaws.mobileconnectors.s3.transferutility.*;
 @ReactModule(name = S3MultipartModule.NAME)
 public class S3MultipartModule extends ReactContextBaseJavaModule {
   public static final String NAME = "S3Multipart";
-
+  
   public static enum CredentialType {
     BASIC, COGNITO
   };
+
   public static final Map<String, Object> nativeCredentialsOptions = new HashMap<String, Object>();
 
   static {
@@ -61,7 +62,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
   private Context context;
   private AmazonS3 s3;
   private TransferUtility transferUtility;
-  private static int completedPercentage = 0;
   private boolean allowCellular = false;
 
   public S3MultipartModule(ReactApplicationContext reactContext) {
@@ -103,7 +103,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
 
   private void subscribe(TransferObserver task) {
     if (task == null) return;
-    final RNS3TransferUtilityMultiPart self = this;
     task.setTransferListener(new TransferListener() {
       @Override
       public void onStateChanged(int id, TransferState state) {
@@ -137,16 +136,13 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
             percentage = Math.round((100*bytesCurrent)/bytesTotal);
           }
 
-          if (percentage > self.completedPercentage) {
-            self.completedPercentage = percentage;
-            WritableMap result = Arguments.createMap();
-            WritableMap taskMap = convertTransferObserver(task);
-            if (taskMap.getDouble("bytes") <= bytesTotal) {
-              taskMap.putDouble("bytes", bytesCurrent);
-            }
-            result.putMap("task", taskMap);
-            sendEvent("@_RNS3_Events", result);
+          WritableMap result = Arguments.createMap();
+          WritableMap taskMap = convertTransferObserver(task);
+          if (taskMap.getDouble("bytes") <= bytesTotal) {
+            taskMap.putDouble("bytes", bytesCurrent);
           }
+          result.putMap("task", taskMap);
+          sendEvent("@_RNS3_Events", result);
         }
       }
 
@@ -297,8 +293,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
     ReadableMap meta = options.getMap("meta");
     ObjectMetadata metaData = new ObjectMetadata();
 
-    this.completedPercentage = 0;
-
     TransferObserver task;
     if (meta != null) {
       ReadableMapKeySetIterator iter = meta.keySetIterator();
@@ -357,7 +351,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
     for (TransferObserver task : tasks) {
       transferUtility.cancel(task.getId());
     }
-	}
+  }
 
   @ReactMethod
   public void deleteRecord(int id, Promise promise) {
@@ -376,36 +370,32 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
     promise.resolve(convertTransferObserverList(list));
   }
 
-	public void pauseAllTasks() {
+  public void pauseAllTasks() {
     List<TransferObserver> tasks = transferUtility.getTransfersWithType(TransferType.getType("upload"));
     for (TransferObserver task : tasks) {
       transferUtility.pause(task.getId());
     }
-	}
+  }
 
-	public void resumeAllTasks(final int retries) {
-    final RNS3TransferUtilityMultiPart self = this;
+  public void resumeAllTasks(final int retries) {
     List<TransferObserver> tasks = transferUtility.getTransfersWithType(TransferType.getType("upload"));
     for (TransferObserver task : tasks) {
       transferUtility.resume(task.getId());
     }
 
-    final int currentCompletedPercentage = new Integer(completedPercentage);
-
     if (retries < 10) {
       new android.os.Handler().postDelayed(
         new Runnable() {
           public void run() {
-            if (currentCompletedPercentage == completedPercentage) {
-              self.resumeAllTasks(retries+1);
-            }
+            resumeAllTasks(retries+1);
           }
         },
-        15000);
+        15000
+      );
     }
   }
 
-	public class NetworkChangeReceiver extends BroadcastReceiver {
+  public class NetworkChangeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
       int status = NetworkUtil.getConnectivityStatusString(context);
@@ -420,6 +410,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
         }
       }
     }
-	}
+  }
 
 }
