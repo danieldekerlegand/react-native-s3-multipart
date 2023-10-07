@@ -1,4 +1,4 @@
-package com.mybigday.rns3;
+package com.s3multipart;
 
 import android.net.ConnectivityManager;
 import android.content.Context;
