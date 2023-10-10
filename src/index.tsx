@@ -58,18 +58,12 @@ eventEmitter.addListener(
     const { task, error } = event;
 
     if (task) {
-      let finalTask = task;
-      if (Platform.OS === 'ios') {
-        const { state, bytes, totalBytes } = task;
-        finalTask = await setTaskExtra(
-          task,
-          { state, bytes, totalBytes },
-          false
-        );
-      } else if (Platform.OS === 'android') {
-        const { bytes } = task;
-        finalTask = await setTaskExtra(task, { bytes }, false);
-      }
+      const { state, bytes, totalBytes } = task;
+      let finalTask = await setTaskExtra(
+        task,
+        { state, bytes, totalBytes },
+        false
+      );
       if (listeners[task.id]) {
         listeners[task.id].forEach((cb: (arg0: any, arg1: any) => any) =>
           cb(error, finalTask)
