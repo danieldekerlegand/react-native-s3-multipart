@@ -119,7 +119,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
           result.putMap("task", completedMap);
         }
 
-        sendEvent("@_RNS3_Events", result);
+        sendEvent("@_S3Multipart_Events", result);
       }
 
       @Override
@@ -136,7 +136,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
             taskMap.putDouble("bytes", bytesCurrent);
           }
           result.putMap("task", taskMap);
-          sendEvent("@_RNS3_Events", result);
+          sendEvent("@_S3Multipart_Events", result);
         }
       }
 
@@ -146,7 +146,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
         WritableMap result = Arguments.createMap();
         result.putMap("task", convertTransferObserver(task));
         result.putString("error", ex.getMessage());
-        sendEvent("@_RNS3_Events", result);
+        sendEvent("@_S3Multipart_Events", result);
       }
     });
   }
