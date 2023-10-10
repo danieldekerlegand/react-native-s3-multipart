@@ -59,7 +59,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
 
   private static boolean alreadyInitialize = false;
   private static boolean enabledProgress = true;
-  private Context context;
   private AmazonS3 s3;
   private TransferUtility transferUtility;
   private boolean allowCellular = false;
@@ -75,7 +74,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
   }
 
   private void sendEvent(String eventName, WritableMap params) {
-    ((ReactApplicationContext) this.context)
+    ((ReactApplicationContext) super.getReactApplicationContext())
       .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
       .emit(eventName, params);
   }
@@ -129,11 +128,6 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
         if (task != null) {
           if (task.getState().toString().equals("IN_PROGRESS") && !enabledProgress) {
             return;
-          }
-
-          int percentage = 0;
-          if (bytesTotal > 0) {
-            percentage = Math.round((100*bytesCurrent)/bytesTotal);
           }
 
           WritableMap result = Arguments.createMap();
@@ -197,7 +191,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
           );
         } else {
           credentialsProvider = new CognitoCachingCredentialsProvider(
-            context,
+            super.getReactApplicationContext(),
             (String) credentialsOptions.get("identity_pool_id"),
             Regions.fromName(cognitoRegion)
           );
@@ -225,7 +219,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
     transferUtility = TransferUtility
             .builder()
             .s3Client(s3)
-            .context(context)
+            .context(super.getReactApplicationContext())
             .transferUtilityOptions(options)
             .build();
 
@@ -242,7 +236,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
     NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver();
-    context.registerReceiver(networkChangeReceiver, intentFilter);
+    super.getReactApplicationContext().registerReceiver(networkChangeReceiver, intentFilter);
   }
 
   @ReactMethod
@@ -301,6 +295,7 @@ public class S3MultipartModule extends ReactContextBaseJavaModule {
         String value = meta.getString(propKey);
         metaData.addUserMetadata(propKey, value);
       }
+
       try {
         task = transferUtility.upload(bucket, key, file, metaData);
         subscribe(task);
