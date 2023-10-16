@@ -45,9 +45,6 @@ target 'S3MultipartExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pod 'AWSCore', '2.33.4'
-  pod 'AWSS3', '2.33.4'
-
   target 'S3MultipartExampleTests' do
     inherit! :complete
     # Pods for testing
