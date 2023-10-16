@@ -1,5 +1,4 @@
 #import "S3Multipart.h"
-#import "RNS3STSCredentialsProvider.h"
 
 static NSMutableDictionary *nativeCredentialsOptions;
 static bool alreadyInitialize = false;
@@ -115,12 +114,8 @@ static NSString* instanceKey = @"S3Multipart";
   NSString *accessKey = options[@"access_key"];
   NSString *secretKey = options[@"secret_key"];
   NSString *sessionKey = options[@"session_token"];
-
-  if (sessionKey) {
-    credentialsProvider = [[RNS3STSCredentialsProvider alloc] initWithAccessKey:accessKey secretKey:secretKey sessionKey:sessionKey];
-  } else {
-    credentialsProvider = [[AWSStaticCredentialsProvider alloc] initWithAccessKey:accessKey secretKey:secretKey];
-  }
+  
+  credentialsProvider = [[AWSStaticCredentialsProvider alloc] initWithAccessKey:accessKey secretKey:secretKey];
 
   AWSRegionType region = [self regionTypeFromString:options[@"region"]];
   AWSServiceConfiguration *configuration = [[AWSServiceConfiguration alloc] initWithRegion:region credentialsProvider:credentialsProvider];
