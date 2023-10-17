@@ -108,16 +108,10 @@ async function setTaskExtra(
   if (!taskExtras[id] || isNew) {
     taskExtras[id] = values;
   } else {
-    if (Platform.OS === 'ios') {
-      if (taskExtras[id].bytes && !values.bytes) {
-        taskExtras[id] = { ...taskExtras[id], state: values.state };
-      } else {
-        taskExtras[id] = { ...taskExtras[id], ...values };
-      }
-    } else if (Platform.OS === 'android') {
-      if (values.bytes) {
-        taskExtras[id] = { ...taskExtras[id], ...values };
-      }
+    if (taskExtras[id].bytes && !values.bytes) {
+      taskExtras[id] = { ...taskExtras[id], state: values.state };
+    } else {
+      taskExtras[id] = { ...taskExtras[id], ...values };
     }
   }
   await saveTaskExtras();
